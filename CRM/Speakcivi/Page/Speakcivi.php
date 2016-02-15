@@ -208,7 +208,9 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
       ),
       'return' => 'id,email,first_name,last_name',
     );
+    CRM_Speakcivi_Tools_Stat::m('createContact-old.csv', 'start');
     $result = civicrm_api3('Contact', 'get', $contact);
+    CRM_Speakcivi_Tools_Stat::m('createContact-old.csv', 'contact.get');
 
     if ($result['count'] == 1) {
       $contact = $this->prepareParamsContact($param, $contact, $result, $result['values'][0]['id']);
@@ -225,9 +227,12 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
       $this->newContact = true;
       $contact = $this->prepareParamsContact($param, $contact, $result);
     }
+    CRM_Speakcivi_Tools_Stat::m('createContact-old.csv', 'prepareParamsContact');
 
-    return civicrm_api3('Contact', 'create', $contact);
+    $result = civicrm_api3('Contact', 'create', $contact);
+    CRM_Speakcivi_Tools_Stat::m('createContact-old.csv', 'contact.create');
 
+    return $result;
   }
 
 

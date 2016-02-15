@@ -14,7 +14,7 @@ class CRM_Speakcivi_Tools_Stat {
 
   const COL_SEC = 2;
 
-  public static $isActive = false;
+  public static $isActive = true;
 
 
   public static function m($filename = '', $description = '') {
