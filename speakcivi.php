@@ -145,6 +145,10 @@ function speakcivi_civicrm_alterMailParams(&$params, $context) {
   // when Send an Email then:
   // $context = '';
   // $params['job_id'] - this keys doesn't exist
+  if (array_key_exists('ams', $params) && $params['ams']) {
+    $session = CRM_Core_Session::singleton();
+    $session->set('ams', $params['ams'], 'ams');
+  }
 }
 
 
@@ -157,4 +161,7 @@ function speakcivi_civicrm_alterMailParams(&$params, $context) {
  */
 function speakcivi_civicrm_alterMailer(&$mailer, $driver, $params) {
   CRM_Core_Error::debug_var('"alterMailer"', "alterMailer", false, true);
+  $session = CRM_Core_Session::singleton();
+  $ams = $session->get('ams', 'ams');
+  CRM_Core_Error::debug_var('$ams', $ams, false, true);
 }
