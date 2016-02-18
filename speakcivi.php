@@ -132,3 +132,29 @@ function speakcivi_civicrm_tokenValues(&$values, $cids, $job = null, $tokens = a
     $values[$cid]['speakcivi.confirmation_hash'] = sha1(CIVICRM_SITE_KEY . $cid);
   }
 }
+
+
+function ams_civicrm_alterMailParams(&$params, $context) {
+  CRM_Core_Error::debug_var('"alterMailParams"', "alterMailParams", false, true);
+  CRM_Core_Error::debug_var('$context', $context, false, true);
+  CRM_Core_Error::debug_var('$params[ams]', $params['ams'], false, true);
+  // when Send test then:
+  // $context = 'civimail';
+  // $params['job_id'] -> civicrm_mailing_job.id
+
+  // when Send an Email then:
+  // $context = '';
+  // $params['job_id'] - this keys doesn't exist
+}
+
+
+/**
+ * Implements hook_civicrm_alterMailer().
+ *
+ * @param $mailer
+ * @param $driver
+ * @param $params
+ */
+function ams_civicrm_alterMailer(&$mailer, $driver, $params) {
+  CRM_Core_Error::debug_var('"alterMailer"', "alterMailer", false, true);
+}
