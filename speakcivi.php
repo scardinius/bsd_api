@@ -134,7 +134,7 @@ function speakcivi_civicrm_tokenValues(&$values, $cids, $job = null, $tokens = a
 }
 
 
-function ams_civicrm_alterMailParams(&$params, $context) {
+function speakcivi_civicrm_alterMailParams(&$params, $context) {
   CRM_Core_Error::debug_var('"alterMailParams"', "alterMailParams", false, true);
   CRM_Core_Error::debug_var('$context', $context, false, true);
   CRM_Core_Error::debug_var('$params[ams]', $params['ams'], false, true);
@@ -155,6 +155,6 @@ function ams_civicrm_alterMailParams(&$params, $context) {
  * @param $driver
  * @param $params
  */
-function ams_civicrm_alterMailer(&$mailer, $driver, $params) {
+function speakcivi_civicrm_alterMailer(&$mailer, $driver, $params) {
   CRM_Core_Error::debug_var('"alterMailer"', "alterMailer", false, true);
 }
