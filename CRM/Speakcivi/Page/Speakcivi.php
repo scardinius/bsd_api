@@ -212,13 +212,16 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
    * @return int 1 ok, 0 failed
    */
   public function petition($param) {
+    CRM_Speakcivi_Tools_Stat::m('petition', 'start');
     $contact = $this->createContact($param, $this->groupId);
+    CRM_Speakcivi_Tools_Stat::m('petition', 'after createContact()');
 
     $optInForActivityStatus = $this->optIn;
     if (!CRM_Speakcivi_Logic_Contact::isContactNeedConfirmation($this->newContact, $contact['id'], $this->groupId, $contact['values'][0]['is_opt_out'])) {
       $this->confirmationBlock = false;
       $optInForActivityStatus = 0;
     }
+    CRM_Speakcivi_Tools_Stat::m('petition', 'after isContactNeedConfirmation()');
 
     $optInMapActivityStatus = array(
       0 => 'Completed',
@@ -229,15 +232,20 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
     }
     $activityStatus = $optInMapActivityStatus[$optInForActivityStatus];
     $activity = $this->createActivity($param, $contact['id'], 'Petition', $activityStatus);
+    CRM_Speakcivi_Tools_Stat::m('petition', 'after createActivity()');
     CRM_Speakcivi_Logic_Activity::setSourceFields($activity['id'], @$param->source);
+    CRM_Speakcivi_Tools_Stat::m('petition', 'after activity::setSourceFields()');
     if ($this->newContact) {
       CRM_Speakcivi_Logic_Contact::setContactCreatedDate($contact['id'], $activity['values'][0]['activity_date_time']);
       CRM_Speakcivi_Logic_Contact::setSourceFields($contact['id'], @$param->source);
     }
+    CRM_Speakcivi_Tools_Stat::m('petition', 'after newContact');
 
     $h = $param->cons_hash;
     if ($this->optIn == 1) {
+      CRM_Speakcivi_Tools_Stat::m('petition', 'after optIn 0');
       $sendResult = $this->sendConfirm($h->emails[0]->email, $contact['id'], $activity['id'], $this->campaignId, $this->confirmationBlock, false);
+      CRM_Speakcivi_Tools_Stat::m('petition', 'after sendConfirm()');
     } else {
       $language = substr($this->locale, 0, 2);
       $pagePost = new CRM_Speakcivi_Page_Post();
@@ -250,7 +258,9 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
         CRM_Speakcivi_Logic_Contact::set($contact['id'], array('preferred_language' => $this->locale));
       }
       $share_utm_source = 'new_'.str_replace('gb', 'uk', strtolower($this->country)).'_member';
+      CRM_Speakcivi_Tools_Stat::m('petition', 'after optIn 0');
       $sendResult = $this->sendConfirm($h->emails[0]->email, $contact['id'], $activity['id'], $this->campaignId, false, false, $share_utm_source);
+      CRM_Speakcivi_Tools_Stat::m('petition', 'after sendConfirm()');
     }
     if ($sendResult['values'] == 1) {
       return 1;
