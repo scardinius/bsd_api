@@ -67,10 +67,51 @@ class CRM_Speakcivi_Tools_Stat {
   }
 
 
+  public static function buildRowsFixed($data, $header) {
+    $first = reset($header);
+    $n = count($header);
+    $rows = array();
+    $j = 0;
+    foreach ($data as $k => $v) {
+      if ($v[self::COL_DESC] == $first) {
+        $row = array();
+        for($i = $k; $i < $k + $n; $i++) {
+          $row[$data[$i][self::COL_DESC]] = $data[$i][self::COL_SEC];
+        }
+        $test = array_intersect_key($row, $header);
+        if (array_keys($test) == array_keys($header)) {
+          $rows[++$j] = array(self::COL_SID => $j) + $row;
+        }
+      }
+    }
+    return $rows;
+  }
+
+
   public static function calculate($filename, $rows) {
     $calcs = array();
     $header = self::getHeader($filename);
     unset($header['SID']); // todo poprawić to
+    foreach ($rows as $k => $row) {
+      $calcs[$k] = $row;
+      $previous = 0;
+      $totalDiff = 0;
+      foreach ($header as $h) {
+        $current = $row[$h];
+        if ($previous) {
+          $calcs[$k][$h.'-DIFF'] = $current - $previous;
+          $totalDiff += $current - $previous;
+        }
+        $previous = $row[$h];
+      }
+      $calcs[$k]['TOTAL-DIFF'] = $totalDiff;
+    }
+    return $calcs;
+  }
+
+
+  public static function calculateFixed($header, $rows) {
+    $calcs = array();
     foreach ($rows as $k => $row) {
       $calcs[$k] = $row;
       $previous = 0;
@@ -111,6 +152,17 @@ class CRM_Speakcivi_Tools_Stat {
   }
 
 
+  public static function saveReportFixed($filename, $header, $rows) {
+    $path = dirname(__FILE__).self::PATH.$filename.'.csv';
+    $fp = fopen($path, 'w');
+    fputcsv($fp, $header, self::DELIMITER, self::ENCLOSURE);
+    foreach ($rows as $row) {
+      fputcsv($fp, $row, self::DELIMITER, self::ENCLOSURE);
+    }
+    fclose($fp);
+  }
+
+
   private static function isValid($filename, $description) {
     return (self::$isActive && $filename && $description);
   }
@@ -134,7 +186,7 @@ class CRM_Speakcivi_Tools_Stat {
   }
 
 
-  private static function getCsv($filename) {
+  public static function getCsv($filename) {
     $data = array();
     $path = dirname(__FILE__).self::PATH.$filename;
     if (($fp = fopen($path, 'r')) !== FALSE) {
