@@ -413,12 +413,15 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
       'return' => 'id,email,first_name,last_name',
     );
 
+    CRM_Speakcivi_Tools_Stat::m('create-contact', 'start createContact');
     $contacIds = CRM_Speakcivi_Logic_Contact::getContactByEmail($h->emails[0]->email);
+    CRM_Speakcivi_Tools_Stat::m('create-contact', 'after getContactByEmail');
     if (is_array($contacIds) && count($contacIds) > 0) {
       $contactParam = $contact;
       $contactParam['id'] = array('IN' => array_keys($contacIds));
       unset($contactParam['email']); // getting by email (pseudoconstant) sometimes doesn't work
       $result = civicrm_api3('Contact', 'get', $contactParam);
+      CRM_Speakcivi_Tools_Stat::m('create-contact', 'after contact.get');
       if ($result['count'] == 1) {
         $contact = $this->prepareParamsContact($param, $contact, $groupId, $result, $result['values'][0]['id']);
       } elseif ($result['count'] > 1) {
@@ -431,11 +434,16 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
         $contactIdBest = $this->chooseBestContact($similarity);
         $contact = $this->prepareParamsContact($param, $contact, $groupId, $result, $contactIdBest);
       }
+      CRM_Speakcivi_Tools_Stat::m('create-contact', 'after prepareParamsContact');
     } else {
+      CRM_Speakcivi_Tools_Stat::m('create-contact', 'after contact.get');
       $this->newContact = true;
       $contact = $this->prepareParamsContact($param, $contact, $groupId);
+      CRM_Speakcivi_Tools_Stat::m('create-contact', 'after prepareParamsContact');
     }
-    return civicrm_api3('Contact', 'create', $contact);
+    $results = civicrm_api3('Contact', 'create', $contact);
+    CRM_Speakcivi_Tools_Stat::m('create-contact', 'after contact.create');
+    return $results;
   }
 
 
