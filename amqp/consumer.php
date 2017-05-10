@@ -87,6 +87,8 @@ function handleError($msg, $error, $retry=false) {
 
 $callback = function($msg) {
   global $msg_since_check;
+  CRM_Speakcivi_Tools_Stat::$customSID = md5(rand());
+  CRM_Speakcivi_Tools_Stat::m('runparams-without-transaction', 'begin');
   try {
     $json_msg = json_decode($msg->body);
     if ($json_msg) {
@@ -112,6 +114,7 @@ $callback = function($msg) {
   } finally {
     $msg_since_check++;
   }
+  CRM_Speakcivi_Tools_Stat::m('runparams-without-transaction', 'end');
 };
 
 $connection = connect();
