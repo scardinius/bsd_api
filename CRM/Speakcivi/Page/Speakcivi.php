@@ -180,7 +180,7 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
    *
    * @param $param
    */
-  function setCountry($param) {
+  public function setCountry($param) {
     if (property_exists($param, 'cons_hash')) {
       $zip = @$param->cons_hash->addresses[0]->zip;
       if ($zip != '') {
@@ -428,7 +428,7 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
    *
    * @return int
    */
-  private function determineGroupId() {
+  public function determineGroupId() {
     if ($this->campaignObj->campaign['campaign_type_id'] == $this->noMemberCampaignType) {
       return $this->noMemberGroupId;
     }
@@ -554,7 +554,7 @@ class CRM_Speakcivi_Page_Speakcivi extends CRM_Core_Page {
   /**
    * Preparing params for API Contact.create based on retrieved result.
    *
-   * @param array $param
+   * @param object $param
    * @param array $contact
    * @param int $groupId
    * @param array $result
