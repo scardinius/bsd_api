@@ -138,16 +138,30 @@ class CRM_Speakcivi_Cleanup_Leave {
     $query = "SELECT l.id, l.subject, NOW() AS activity_date_time
               FROM speakcivi_cleanup_leave l
               WHERE l.id IN (
-                SELECT ac.contact_id
-                FROM civicrm_activity a
-                  JOIN civicrm_activity_contact ac ON ac.activity_id = a.id
-                  JOIN speakcivi_cleanup_leave l2 ON l2.id = ac.contact_id
-                WHERE a.activity_type_id = %1 AND a.activity_date_time < (
-                  SELECT max(modified_date) FROM civicrm_log WHERE entity_table = 'civicrm_contact' AND entity_id = l2.id
-                )
+                SELECT
+                  t1.contact_id
+                FROM
+                  (SELECT
+                    ac1.contact_id, a1.activity_type_id, a1.activity_date_time
+                  FROM civicrm_activity a1
+                    JOIN civicrm_activity_contact ac1 ON ac1.activity_id = a1.id
+                    JOIN speakcivi_cleanup_leave l2 ON l2.id = ac1.contact_id
+                  WHERE a1.activity_type_id IN (%1, %2)) t1
+                  LEFT JOIN
+                  (SELECT
+                    ac2.contact_id, a2.activity_type_id, a2.activity_date_time
+                  FROM civicrm_activity a2
+                    JOIN civicrm_activity_contact ac2 ON ac2.activity_id = a2.id
+                  WHERE a2.activity_type_id IN (%1, %2)) t2
+                    ON t2.contact_id = t1.contact_id AND t1.activity_date_time < t2.activity_date_time
+                WHERE t2.contact_id IS NULL AND t1.activity_type_id = %1
               )";
-    $activityTypeId = CRM_Core_BAO_Setting::getItem('Speakcivi API Preferences', 'activity_type_join');
-    $params = array(1 => array($activityTypeId, 'Integer'));
+    $joinTypeId = CRM_Core_BAO_Setting::getItem('Speakcivi API Preferences', 'activity_type_join');
+    $leaveTypeId = CRM_Core_BAO_Setting::getItem('Speakcivi API Preferences', 'activity_type_leave');
+    $params = [
+      1 => [$joinTypeId, 'Integer'],
+      2 => [$leaveTypeId, 'Integer'],
+    ];
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     return $dao->fetchAll();
   }
